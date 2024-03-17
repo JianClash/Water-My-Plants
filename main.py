@@ -19,8 +19,9 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 background_sprite = pygame.image.load('assets/background.png')
 background_sprite = pygame.transform.scale(background_sprite, (WIDTH, HEIGHT))
 
-plant = pygame.image.load('assets/plant_template.png')
-plant = pygame.transform.scale(plant, (150, 150))
+
+dead_plant = pygame.image.load('assets/dead_plant.png')
+dead_plant = pygame.transform.scale(dead_plant, (150, 150))
 
 
 def update_date(current_date):
@@ -50,9 +51,10 @@ def get_days_passed():
 
 class Plant:
     # frequency -> in how long the plant have to be watered
-    def __init__(self, frequency, days_passed):
+    def __init__(self, frequency, days_passed, sprite):
         self.frequency = frequency
         self.days_passed = days_passed
+        self.sprite = sprite
 
     def is_expired(self):
         if self.frequency <= self.days_passed:
@@ -60,15 +62,16 @@ class Plant:
         return False
 
 
+### MAKE NEW PLANTS HERE ###
+plant = pygame.image.load('assets/plant_template.png')
+plant = pygame.transform.scale(plant, (150, 150))
+
+golden_pothos = pygame.image.load('assets/plants/golden_pothos.png') 
+golden_pothos = pygame.transform.scale(golden_pothos, (150, 150))
+
 days_passed = get_days_passed()
-plants = [Plant(1, days_passed),
-          Plant(2, days_passed),
-          Plant(3, days_passed),
-          Plant(4, days_passed),
-          Plant(5, days_passed),
-          Plant(6, days_passed),
-          Plant(7, days_passed),
-          Plant(8, days_passed),]
+plants = [Plant(7, days_passed, golden_pothos),
+          Plant(0, days_passed, plant),]
 
 
 def draw():
@@ -81,12 +84,25 @@ def draw_plants():
     for j in range(2):
         # Column
         for i in range(4):
-            # Get all plants and check if expired(Needs watering)
-            if not plants[i + (j*2)].is_expired():
-                # Draw plant
-                screen.blit(plant,
+            # first row j = 0, only i is considerd
+            # second row j = 1, 4 is added to get the next indecies
+            index = i + (4*j)
+            if len(plants)-1 < index:
+                return
+
+            plant = plants[index]
+
+            if plant.is_expired():
+                # Draw dead plant
+                screen.blit(dead_plant,
                             (i*plantHolderDiff_x + x_buffer,
                              j*plantHolderDiff_y + y_buffer))
+            else:
+                # Draw plant
+                screen.blit(plant.sprite,
+                            (i*plantHolderDiff_x + x_buffer,
+                             j*plantHolderDiff_y + y_buffer))
+
 
 
 def main():
